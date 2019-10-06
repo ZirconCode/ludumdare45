@@ -19,3 +19,7 @@ func _on_Button_pressed():
 	get_node("Label").text = "HELLO!"
 	get_tree().change_scene ( "res://game.tscn" )
 #     get_tree().call_group("enemies", "player_was_discovered")
+
+
+func _on_Button2_pressed():
+	pass # Replace with function body.

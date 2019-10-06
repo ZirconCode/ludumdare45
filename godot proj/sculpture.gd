@@ -30,6 +30,11 @@ var reset_sculpt = true
 
 var mousedown = false
 
+var max_holes = 8
+var holes_left = max_holes
+var max_cracks = 32
+var cracks_left = max_cracks
+
 var holes = []
 var lines = []
 var x =0
@@ -61,6 +66,7 @@ func _ready():
 	board.set_texture(rt)
 	add_child(board)
 	
+	updateBut()
 	#yield(pen,"draw")
 	#
 
@@ -222,11 +228,15 @@ func _on_sculpture_gui_input(event):
 			if tool == 3:
 				var xy = event.position
 				floodfill(xy.x,xy.y)
-			if tool == 1:
+			if tool == 1 and holes_left > 0:
+				holes_left -= 1
+				updateBut()
 				holes.append(event.position)
 				yield(pen,"draw")
 				pen.draw_circle(event.position,5,Color.black) # TODO good?
-			if tool == 2:
+			if tool == 2 and cracks_left >0:
+				cracks_left -= 1
+				updateBut()
 				###########################################################
 				###########################################################
 				chisel_prog = 0
@@ -429,9 +439,15 @@ func _on_scorebut_pressed():
 	var score = getScore()
 	get_node("../scorebut").text = str(score)
 
+func updateBut():
+	get_node("../chisbut").text = "Chisel "+str(cracks_left)
+	get_node("../holbut").text = "Holes  "+str(holes_left)
 
 func _on_restartbut_pressed():
 	yield(pen,"draw") #WOW.
 	pen.draw_rect(Rect2(Vector2(0,0),self.rect_size),Color.navajowhite,true)
 	holes = []
+	holes_left = max_holes
+	cracks_left = max_cracks
+	updateBut()
 	
