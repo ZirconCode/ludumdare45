@@ -26,6 +26,11 @@ var tool = 2
 ### victory algorithm
 # have goal statue, compare "pixel by pixel", get score
 
+var viewport = Viewport.new()
+var pen = null
+var prev_mouse_pos = Vector2(0,0)
+var img = null
+var img_tmp = ImageTexture.new()
 
 var mousedown = false
 
@@ -39,7 +44,41 @@ var chisel_lines = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	# Replace with function body.
+	viewport = Viewport.new()
+	viewport.size = self.rect_size
+	viewport.usage = Viewport.USAGE_2D
+	
+	# ?
+	viewport.render_target_clear_mode = Viewport.CLEAR_MODE_ONLY_NEXT_FRAME # CLEAR_MODE_NEVER , CLEAR_MODE_ONLY_NEXT_FRAME
+	viewport.render_target_v_flip = true
+	
+	pen = Node2D.new()
+	viewport.add_child(pen)
+	pen.connect("draw", self, "_on_draw")
+	
+	add_child(viewport)
+
+	# Use a sprite to display the result texture
+	var rt = viewport.get_texture()
+	var board = TextureRect.new()
+	board.set_texture(rt)
+	add_child(board)
+	
+	
+
+func _on_draw():
+	#pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
+	var mouse_pos = get_local_mouse_position()
+
+	if Input.is_mouse_button_pressed(BUTTON_LEFT):
+		pen.draw_line(mouse_pos, prev_mouse_pos, Color(1, 1, 0))
+
+	prev_mouse_pos = mouse_pos
+	
+	#img.set_pixel(5,5,Color.black)
+	#print(img.get_pixel(5,5))
+
 
 # CanvasItem.update() 
 func _process(delta):
@@ -48,7 +87,10 @@ func _process(delta):
 	
 	if mousedown and tool == 2:
 		chisel_prog += delta*19
-	print(chisel_prog)
+	#print(chisel_prog)
+	
+	#pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
+	pen.update() ###
 	
 	update()
 	
@@ -112,9 +154,15 @@ func _input(event):
 
 func _on_sculpture_gui_input(event):
 	if event is InputEventMouseMotion:
-		print(event.position)
+		#print(event.position)
 		mousepos = event.position
 	elif event is InputEventMouseButton:
+		
+		#pen.update()
+		yield(pen,"draw") #WOW.
+		pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
+		
+		
 		print("clicky")
 		mousedown = false
 		
@@ -179,3 +227,21 @@ func _on_holbut_pressed():
 func _on_chisbut_pressed():
 	tool = 2
 	#pass # Replace with function body.
+
+
+func _on_Button_pressed():
+	#pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
+	img = viewport.get_texture().get_data()
+	img.lock()
+	print("aaa",img.get_pixel(10,5))
+	
+	img.set_pixel(10,5,Color.red)
+	#img.unlock()
+	print("aaa",img.get_pixel(10,5))
+	img.unlock()
+	img_tmp = ImageTexture.new()
+	img_tmp.create_from_image(img)
+	
+	yield(pen,"draw") #WOW.
+	pen.draw_texture(img_tmp,Vector2(0,0))
+	pen.draw_circle(Vector2(50,50),5,Color.blue)

@@ -29,10 +29,10 @@ polygon = PoolVector2Array( 361.548, 218.521, 409.194, 185.28, 439.111, 214.089,
 script = ExtResource( 1 )
 
 [node name="sculpture" type="Control" parent="Panel"]
-margin_left = 213.133
-margin_top = 181.108
-margin_right = 446.133
-margin_bottom = 524.108
+margin_left = 211.905
+margin_top = 184.791
+margin_right = 444.905
+margin_bottom = 527.791
 rect_clip_content = true
 script = ExtResource( 2 )
 
@@ -49,6 +49,14 @@ margin_top = 34.6832
 margin_right = 230.772
 margin_bottom = 70.6832
 text = "chisel"
+
+[node name="Button" type="Button" parent="Panel"]
+margin_left = 901.0
+margin_top = 43.0
+margin_right = 1015.0
+margin_bottom = 100.0
+text = "do the thing"
 [connection signal="gui_input" from="Panel/sculpture" to="Panel/sculpture" method="_on_sculpture_gui_input"]
 [connection signal="pressed" from="Panel/holbut" to="Panel/sculpture" method="_on_holbut_pressed"]
 [connection signal="pressed" from="Panel/chisbut" to="Panel/sculpture" method="_on_chisbut_pressed"]
+[connection signal="pressed" from="Panel/Button" to="Panel/sculpture" method="_on_Button_pressed"]
