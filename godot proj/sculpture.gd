@@ -11,26 +11,22 @@ var tool = 2
 # 3 = flood fill remove piece, PAIN
 
 #### Until minimal playable game =)
+
 ## Big TODOs:
 ### adapt chisel to holes:
 # check if hole within range, make sure one path goes there, exhaust until random necessary
 # display distance of when holes are relevant
 ### make cracks better
 # something funky with angles, adapt rands and distance
-### !! removing pieces
-# have: lines and border of rectangle (also as lines..)
-# make polygon surrounding mouse click, bordered by lines, remember polygon, draw as black
-# use polygons for victory algorithm
-## how to get polygons? shit. 
-#so originally just wanted floodfill. easier to force this into godot?
-### victory algorithm
-# have goal statue, compare "pixel by pixel", get score
+
 
 var viewport = Viewport.new()
 var pen = null
 var prev_mouse_pos = Vector2(0,0)
 var img = null
 var img_tmp = ImageTexture.new()
+
+var reset_sculpt = true
 
 var mousedown = false
 
@@ -65,16 +61,41 @@ func _ready():
 	board.set_texture(rt)
 	add_child(board)
 	
-	
+	#yield(pen,"draw")
+	#
+
 
 func _on_draw():
+	#var D = 4
+	#if 3==D:
+	#	pass
+	
+	if mousedown and tool == 2:
+		for l in chisel_lines:
+			#pen.draw_polyline(l,Color.gray,3) # TODO chisel_prog, and lerp last line
+			# TODO remove hinter
+			for i in range(l.size()):
+				var p = l[i]
+				if p.distance_to(l[0]) > chisel_prog:
+					print("a",p.distance_to(l[0]))
+					# TODO lerp last segment
+					break
+				elif i > 0:
+					pen.draw_line(l[i-1],p,Color.black,3)
+	###### ?????????????????????????
+	#print(reset_sculpt)
+	#if reset_sculpt: # and OS.can_draw: #.....
+	#	reset_sculpt = false
+	#	print(self.rect_size)
+	#	pen.draw_rect(Rect2(Vector2(0,0),self.rect_size),Color.navajowhite,true)
+	#	pen.draw_line(Vector2(0,0), Vector2(100,50), Color(1, 1, 0))
 	#pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
-	var mouse_pos = get_local_mouse_position()
+	#var mouse_pos = get_local_mouse_position()
 
-	if Input.is_mouse_button_pressed(BUTTON_LEFT):
-		pen.draw_line(mouse_pos, prev_mouse_pos, Color(1, 1, 0))
+	#if Input.is_mouse_button_pressed(BUTTON_LEFT):
+	
 
-	prev_mouse_pos = mouse_pos
+	#prev_mouse_pos = mouse_pos
 	
 	#img.set_pixel(5,5,Color.black)
 	#print(img.get_pixel(5,5))
@@ -88,6 +109,9 @@ func _process(delta):
 	if mousedown and tool == 2:
 		chisel_prog += delta*19
 	#print(chisel_prog)
+	
+
+	
 	
 	#pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
 	pen.update() ###
@@ -129,7 +153,7 @@ func _draw():
 			for i in range(l.size()):
 				var p = l[i]
 				if p.distance_to(l[0]) > chisel_prog:
-					print("a",p.distance_to(l[0]))
+					#print("a",p.distance_to(l[0]))
 					# TODO lerp last segment
 					break
 				elif i > 0:
@@ -153,14 +177,16 @@ func _input(event):
 #   print("Viewport Resolution is: ", get_viewport_rect().size)
 
 func _on_sculpture_gui_input(event):
+	#print(event)
+	
 	if event is InputEventMouseMotion:
 		#print(event.position)
 		mousepos = event.position
 	elif event is InputEventMouseButton:
 		
 		#pen.update()
-		yield(pen,"draw") #WOW.
-		pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
+		#yield(pen,"draw") #WOW.
+		#pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
 		
 		
 		print("clicky")
@@ -189,8 +215,14 @@ func _on_sculpture_gui_input(event):
 			mousedown = true
 			# Scrool wheel even counts!
 			# event.button_index == BUTTON_LEFT
+			
+			if tool == 3:
+				var xy = event.position
+				floodfill(xy.x,xy.y)
 			if tool == 1:
 				holes.append(event.position)
+				yield(pen,"draw")
+				pen.draw_circle(event.position,10,Color.pink)
 			if tool == 2:
 				chisel_prog = 0
 				chisel_lines = []
@@ -216,8 +248,106 @@ func _on_sculpture_gui_input(event):
 				pass
 		
 		
+func getScore():
+	var score = 0.0
+	
+	var correctpixels = 0
+	var totalpixels = 250*400
+	
+	var existing_total = 0
+	
+	var existing_correct = 0
+	var existing_wrong = 0
+	
+	img = viewport.get_texture().get_data()
+	img.lock()
+	
+	var goal_img = get_node("../TextureRect").texture.get_data()
+	#get_node("../TextureRect").get_viewport().get_texture().get_data()
+	goal_img.lock()
+	
+	for x in range(250):
+		for y in range(400):
+			#var px1 = img.get_pixel(x,y)
+			var px1 = Color.navajowhite
+			var px2 = goal_img.get_pixel(x,y)
+			var r_diff = abs(px1.r-px2.r)
+			var g_diff = abs(px1.g-px2.g)
+			var b_diff = abs(px1.b-px2.b)
+			#print(px1,"AAA",px2)
+			if r_diff+g_diff+b_diff < 0.3:
+				existing_total += 1
+	
+	for x in range(250):
+		for y in range(400):
+			var existing = false
+			var px1 = img.get_pixel(x,y)
+			var px2 = Color.navajowhite
+			#var px2 = goal_img.get_pixel(x,y)
+			var r_diff = abs(px1.r-px2.r)
+			var g_diff = abs(px1.g-px2.g)
+			var b_diff = abs(px1.b-px2.b)
+			#print(px1,"AAA",px2)
+			if r_diff+g_diff+b_diff < 0.3:
+				existing = true
+				if existing:
+					px1 = img.get_pixel(x,y)
+					px2 = goal_img.get_pixel(x,y)
+					r_diff = abs(px1.r-px2.r)
+					g_diff = abs(px1.g-px2.g)
+					b_diff = abs(px1.b-px2.b)
+					if r_diff+g_diff+b_diff < 0.3:
+						existing_correct += 1
+					else:
+						existing_wrong += 1
+	
+	img.unlock()
+	goal_img.unlock()
+	
+	print(existing_correct,":",existing_wrong,":",existing_total)
+	
+	score = float(existing_correct-existing_wrong)/existing_total
+	score = score * 1000
+	score = round(score)
+	
+	if score < 0:
+		score = 0
+	
+	print("score",score)
+	return score
 		
+func floodfill(x,y):
+	var pixels = [Vector2(x,y)]
+	
+	img = viewport.get_texture().get_data()
+	img.lock()
+	
+	while !pixels.empty():
+		var px = pixels.pop_back()
+		x = px.x
+		y = px.y
+		var clr = img.get_pixel(x,y)
+		var r_diff = abs(clr.r-Color.navajowhite.r)
+		var g_diff = abs(clr.g-Color.navajowhite.g)
+		var b_diff = abs(clr.b-Color.navajowhite.b)
+		if r_diff+g_diff+b_diff < 0.2:
+			print("nice")
+			img.set_pixel(x,y,Color.black)
+			if x+1 <= self.rect_size.x:
+				pixels.append(Vector2(x+1,y))
+			if x-1 >= 0:
+				pixels.append(Vector2(x-1,y))
+			if y-1 >= 0:
+				pixels.append(Vector2(x,y-1))
+			if y+1 <= self.rect_size.y:
+				pixels.append(Vector2(x,y+1))
+			# floodfill neighbours, respect borders
 
+	img.unlock()
+	img_tmp = ImageTexture.new()
+	img_tmp.create_from_image(img)
+	yield(pen,"draw") #WOW.
+	pen.draw_texture(img_tmp,Vector2(0,0))
 
 func _on_holbut_pressed():
 	tool = 1
@@ -228,6 +358,10 @@ func _on_chisbut_pressed():
 	tool = 2
 	#pass # Replace with function body.
 
+#func getPixel(x,y):
+#	img = viewport.get_texture().get_data()
+#	img.lock()
+#	return img.get_pixel(x,y)
 
 func _on_Button_pressed():
 	#pen.draw_line(Vector2(0,0),Vector2(50,50),Color.red, 5)
@@ -245,3 +379,26 @@ func _on_Button_pressed():
 	yield(pen,"draw") #WOW.
 	pen.draw_texture(img_tmp,Vector2(0,0))
 	pen.draw_circle(Vector2(50,50),5,Color.blue)
+
+
+
+func _on_startbut_pressed():
+	yield(pen,"draw") #WOW.
+	pen.draw_rect(Rect2(Vector2(0,0),self.rect_size),Color.navajowhite,true)
+	get_node("../startbut").visible = false
+
+
+func _on_fldbut_pressed():
+	tool = 3
+	
+
+func _on_scorebut_pressed():
+	var score = getScore()
+	get_node("../scorebut").text = str(score)
+
+
+func _on_restartbut_pressed():
+	yield(pen,"draw") #WOW.
+	pen.draw_rect(Rect2(Vector2(0,0),self.rect_size),Color.navajowhite,true)
+	holes = []
+	

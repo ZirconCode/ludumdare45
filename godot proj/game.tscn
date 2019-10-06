@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://cloud.gd" type="Script" id=1]
 [ext_resource path="res://sculpture.gd" type="Script" id=2]
+[ext_resource path="res://drawing.png" type="Texture" id=3]
 
 [node name="Node2D" type="Node2D"]
 
@@ -29,10 +30,10 @@ polygon = PoolVector2Array( 361.548, 218.521, 409.194, 185.28, 439.111, 214.089,
 script = ExtResource( 1 )
 
 [node name="sculpture" type="Control" parent="Panel"]
-margin_left = 211.905
-margin_top = 184.791
-margin_right = 444.905
-margin_bottom = 527.791
+margin_left = 213.133
+margin_top = 171.286
+margin_right = 463.133
+margin_bottom = 571.286
 rect_clip_content = true
 script = ExtResource( 2 )
 
@@ -56,7 +57,46 @@ margin_top = 43.0
 margin_right = 1015.0
 margin_bottom = 100.0
 text = "do the thing"
+
+[node name="startbut" type="Button" parent="Panel"]
+margin_left = 190.495
+margin_top = 132.505
+margin_right = 524.495
+margin_bottom = 593.505
+text = "Start from Nothing"
+
+[node name="fldbut" type="Button" parent="Panel"]
+margin_left = 243.772
+margin_top = 36.6598
+margin_right = 347.772
+margin_bottom = 71.6598
+text = "floodfill"
+
+[node name="TextureRect" type="TextureRect" parent="Panel"]
+margin_left = 615.337
+margin_top = 149.762
+margin_right = 865.337
+margin_bottom = 549.762
+texture = ExtResource( 3 )
+
+[node name="scorebut" type="Button" parent="Panel"]
+margin_left = 775.93
+margin_top = 40.5154
+margin_right = 868.93
+margin_bottom = 96.5154
+text = "score?"
+
+[node name="restartbut" type="Button" parent="Panel"]
+margin_left = 444.441
+margin_top = 40.5154
+margin_right = 528.441
+margin_bottom = 69.5154
+text = "restart"
 [connection signal="gui_input" from="Panel/sculpture" to="Panel/sculpture" method="_on_sculpture_gui_input"]
 [connection signal="pressed" from="Panel/holbut" to="Panel/sculpture" method="_on_holbut_pressed"]
 [connection signal="pressed" from="Panel/chisbut" to="Panel/sculpture" method="_on_chisbut_pressed"]
 [connection signal="pressed" from="Panel/Button" to="Panel/sculpture" method="_on_Button_pressed"]
+[connection signal="pressed" from="Panel/startbut" to="Panel/sculpture" method="_on_startbut_pressed"]
+[connection signal="pressed" from="Panel/fldbut" to="Panel/sculpture" method="_on_fldbut_pressed"]
+[connection signal="pressed" from="Panel/scorebut" to="Panel/sculpture" method="_on_scorebut_pressed"]
+[connection signal="pressed" from="Panel/restartbut" to="Panel/sculpture" method="_on_restartbut_pressed"]
