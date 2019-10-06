@@ -70,6 +70,8 @@ Am at other friends place, maybe we can find a good solution to the flood fill g
 
 
 
+Almost minimal prototype! Woooooo!!!
+
 
 
 
