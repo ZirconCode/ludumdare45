@@ -60,6 +60,14 @@ godot seems surprsingly unflexible if not want completely predictable things. =/
 
 
 
+-----------
+
+
+SUNDAY:
+
+Friend made some great music.
+Am at other friends place, maybe we can find a good solution to the flood fill godot clash.
+
 
 
 
