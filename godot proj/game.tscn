@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://cloud.gd" type="Script" id=1]
 [ext_resource path="res://sculpture.gd" type="Script" id=2]
 [ext_resource path="res://drawing.png" type="Texture" id=3]
+[ext_resource path="res://Node2D.gd" type="Script" id=4]
 
 [node name="Node2D" type="Node2D"]
 
@@ -92,6 +93,9 @@ margin_top = 40.5154
 margin_right = 528.441
 margin_bottom = 69.5154
 text = "restart"
+
+[node name="Node2D" type="Node2D" parent="Panel"]
+script = ExtResource( 4 )
 [connection signal="gui_input" from="Panel/sculpture" to="Panel/sculpture" method="_on_sculpture_gui_input"]
 [connection signal="pressed" from="Panel/holbut" to="Panel/sculpture" method="_on_holbut_pressed"]
 [connection signal="pressed" from="Panel/chisbut" to="Panel/sculpture" method="_on_chisbut_pressed"]

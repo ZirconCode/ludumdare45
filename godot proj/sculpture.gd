@@ -69,18 +69,20 @@ func _on_draw():
 	#var D = 4
 	#if 3==D:
 	#	pass
-	
 	if mousedown and tool == 2:
 		for l in chisel_lines:
+			var true_range = chisel_prog
+			if l[0]:
+				true_range = true_range*2
 			#pen.draw_polyline(l,Color.gray,3) # TODO chisel_prog, and lerp last line
 			# TODO remove hinter
-			for i in range(l.size()):
+			for i in range(1,l.size()):
 				var p = l[i]
-				if p.distance_to(l[0]) > chisel_prog:
-					print("a",p.distance_to(l[0]))
+				if p.distance_to(l[1]) > true_range:
+					print("a",p.distance_to(l[1]))
 					# TODO lerp last segment
 					break
-				elif i > 0:
+				elif i > 1:
 					pen.draw_line(l[i-1],p,Color.black,3)
 	###### ?????????????????????????
 	#print(reset_sculpt)
@@ -107,7 +109,7 @@ func _process(delta):
 	x = wrapf(x,0,100)
 	
 	if mousedown and tool == 2:
-		chisel_prog += delta*19
+		chisel_prog += delta*20
 	#print(chisel_prog)
 	
 
@@ -120,7 +122,8 @@ func _process(delta):
 	
 	
 func _draw():
-	draw_rect(Rect2(Vector2(0,0),self.rect_size),Color.navajowhite,true)
+	pass
+	#draw_rect(Rect2(Vector2(0,0),self.rect_size),Color.navajowhite,true)
 	
 	#if tool == 0:
 	#	var a = mousepos.x
@@ -129,35 +132,35 @@ func _draw():
 	
 	
 	
-	draw_line(Vector2(0,0),Vector2(50,50),Color.red,5)
-	draw_circle(Vector2(x,20),5,Color.white)
+	#draw_line(Vector2(0,0),Vector2(50,50),Color.red,5)
+	#draw_circle(Vector2(x,20),5,Color.white)
 	
-	for h in holes:
-		draw_circle(h,10,Color.pink)
+	#for h in holes:
+	#	draw_circle(h,10,Color.pink)
 
-	if tool == 2:
+	#if tool == 2:
 		# progess, lerp
 		# rand_range(
 		# deg2rad(
 		# indicate if prog is sufficient to add crack -> early abort allowed
-		pass
+	#	pass
 		
 	
-	for l in lines:
-		draw_polyline(l,Color.black,3) #
+	#for l in lines:
+	#	draw_polyline(l,Color.black,3) #
 	
-	if mousedown and tool ==2:
-		for l in chisel_lines:
-			draw_polyline(l,Color.gray,3) # TODO chisel_prog, and lerp last line
+	#if mousedown and tool ==2:
+	#	for l in chisel_lines:
+	#		draw_polyline(l,Color.gray,3) # TODO chisel_prog, and lerp last line
 			# TODO remove hinter
-			for i in range(l.size()):
-				var p = l[i]
-				if p.distance_to(l[0]) > chisel_prog:
+	#		for i in range(1,l.size()):
+	#			var p = l[i]
+	#			if p.distance_to(l[1]) > chisel_prog:
 					#print("a",p.distance_to(l[0]))
 					# TODO lerp last segment
-					break
-				elif i > 0:
-					draw_line(l[i-1],p,Color.black,3)
+	#				break
+	#			elif i > 1:
+	#				draw_line(l[i-1],p,Color.black,3)
 				
 			#draw_polyline(l,Color.black,3) # TODO chisel_prog, and lerp last line
 
@@ -193,21 +196,21 @@ func _on_sculpture_gui_input(event):
 		mousedown = false
 		
 		#### UNFINISHED < add truncated cracks to total list, see drawing routine
-		if chisel_prog > 1:
-			print("added lines")
-			for l in chisel_lines:
-				var tmp_line = [l[0]]
-				for i in range(l.size()):
-					var p = l[i]
-					if p.distance_to(l[0]) > chisel_prog:
+		#if chisel_prog > 1:
+		#	print("added lines")
+		#	for l in chisel_lines:
+		#		var tmp_line = [l[0]]
+		#		for i in range(1,l.size()):
+		#			var p = l[i]
+		#			if p.distance_to(l[1]) > chisel_prog:
 						#print("a",p.distance_to(l[0]))
 						# TODO lerp last segment
-						break
-					elif i > 0:
-						tmp_line.append(p)
-				tmp_line = PoolVector2Array(tmp_line)
-				if tmp_line.size() > 1:
-					lines.append(tmp_line)
+		#				break
+		#			elif i > 0:
+		#				tmp_line.append(p)
+		#		tmp_line = PoolVector2Array(tmp_line)
+		#		if tmp_line.size() > 1:
+		#			lines.append(tmp_line)
 			# TODO
 			
 		if event.pressed:
@@ -222,24 +225,53 @@ func _on_sculpture_gui_input(event):
 			if tool == 1:
 				holes.append(event.position)
 				yield(pen,"draw")
-				pen.draw_circle(event.position,10,Color.pink)
+				pen.draw_circle(event.position,5,Color.black) # TODO good?
 			if tool == 2:
+				###########################################################
+				###########################################################
 				chisel_prog = 0
 				chisel_lines = []
 				# randomize fracture, ignore holes TODO <- norm of holes to click < range
-				for i in range(0,2+(randi()%3)):
-					var line = [event.position]
-					var angle = deg2rad(rand_range(0,360))
-					for i in range(0,2+(randi()%4)):
-						var length = rand_range(10,30)
-						# TODO something broken here =)
-						angle = angle+deg2rad(rand_range(rad2deg(angle)-20,rad2deg(angle)+20)) # TODO, limit this to general angle range of previous angle / 
-						# from origin
-						var x_tmp = line[-1].x + (length*sin(angle))
-						var y_tmp = line[-1].y + (length*cos(angle)) # sin/cos.. correct.
-						line.append(Vector2(x_tmp,y_tmp))
-					line = PoolVector2Array(line)
+				var hole_range = 50
+				var holes_in_range = []
+				
+				for h in holes:
+					if h.distance_to(event.position) < hole_range:
+						holes_in_range.append(h)
+				
+				var lines_num = 3+(randi()%3)
+				
+				for i in range(0,len(holes_in_range)):
+					var line = [true,event.position]
+					var segments = 4+(randi()%4)
+					for j in range(0,segments):
+						line.append(lerp(event.position,holes_in_range[i],float(1+j)/segments))
+					for j in range(2,len(line)-1): # dont move last one?
+						line[j].x = line[j].x+rand_range(-5,5)
+						line[j].y = line[j].y+rand_range(-5,5)
+					#line = PoolVector2Array(line)
 					chisel_lines.append(line)
+				
+				lines_num -= len(holes_in_range)
+				
+				if lines_num > 0:
+					for i in range(0,lines_num):
+						var line = [false,event.position]
+						var segments = 4+(randi()%4)
+						var sim_hole = Vector2(event.position.x+rand_range(-50,50),event.position.y+rand_range(-50,50))
+					#var angle = deg2rad(rand_range(0,360))
+						for j in range(0,segments):
+							line.append(lerp(event.position,sim_hole,float(1+j)/segments))
+						for j in range(2,len(line)-1): # dont move last one?
+							line[j].x = line[j].x+rand_range(-5,5)
+							line[j].y = line[j].y+rand_range(-5,5)
+						# TODO something broken here =)
+						#angle = angle+deg2rad(rand_range(rad2deg(angle)-20,rad2deg(angle)+20)) # TODO, limit this to general angle range of previous angle / 
+						# from origin
+						#var x_tmp = line[-1].x + (length*sin(angle))
+						#var y_tmp = line[-1].y + (length*cos(angle)) # sin/cos.. correct.
+						#line.append(Vector2(x_tmp,y_tmp))
+						chisel_lines.append(line)
 					
 						
 				# randomize lines
@@ -309,6 +341,7 @@ func getScore():
 	score = float(existing_correct-existing_wrong)/existing_total
 	score = score * 1000
 	score = round(score)
+	# max is 1000, min is 0; 200 is totally acceptable?
 	
 	if score < 0:
 		score = 0

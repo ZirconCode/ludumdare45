@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/Brutal Slaughter Part 1.ogg-eb8785a801ed1615342c203f4ade30ea.oggstr"
+
+[deps]
+
+source_file="res://Brutal Slaughter Part 1.ogg"
+dest_files=[ "res://.import/Brutal Slaughter Part 1.ogg-eb8785a801ed1615342c203f4ade30ea.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0

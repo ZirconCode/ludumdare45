@@ -19,6 +19,14 @@ config/name="ludumdare45-sculptures"
 run/main_scene="res://Node2D.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+AudioStreamPlayerr="*res://AudioStreamPlayer.tscn"
+
+[display]
+
+window/size/resizable=false
+
 [rendering]
 
 quality/driver/driver_name="GLES2"

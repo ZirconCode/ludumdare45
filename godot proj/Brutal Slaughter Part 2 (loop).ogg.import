@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/Brutal Slaughter Part 2 (loop).ogg-a1197603adee76a31b97781cbe4a4e4d.oggstr"
+
+[deps]
+
+source_file="res://Brutal Slaughter Part 2 (loop).ogg"
+dest_files=[ "res://.import/Brutal Slaughter Part 2 (loop).ogg-a1197603adee76a31b97781cbe4a4e4d.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0
